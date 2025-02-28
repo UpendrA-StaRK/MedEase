@@ -84,22 +84,20 @@ indices = pd.Series(final_df.index, index=final_df['SURGERY TYPE']).drop_duplica
 def model1(surgery, sig=sig):
     idx = indices[surgery]
     return list(dict.fromkeys(final_df[final_df['SURGERY TYPE']==surgery]['Name']))[:10]
-# le_surgery = LabelEncoder()
-# final_df['SURGERY TYPE Encoded'] = le_surgery.fit_transform(final_df['SURGERY TYPE'])
-# final_df['QUALIFICATIONS Encoded'] = final_df['QUALIFICATIONS'].astype('category').cat.codes
-# features = final_df[['SURGERY TYPE Encoded', 'QUALIFICATIONS Encoded']]
-# scaler = StandardScaler()
-# features_scaled = scaler.fit_transform(features)
-# knn = NearestNeighbors(n_neighbors=10, algorithm='auto')
-# knn.fit(features_scaled)
-# def model2(surgery_name):
-#     if surgery_name not in final_df['SURGERY TYPE'].values:
-#         return "surgery not found."
-#     idx = final_df[final_df['SURGERY TYPE'] == surgery_name].index[0]
-#     surgery_features = features_scaled[idx].reshape(1, -1)
-#     distances, indices = knn.kneighbors(surgery_features)
-#     similar_indices = indices[0][1:]
-#     return list(dict.fromkeys(final_df['Name'].iloc[similar_indices]))[:10]
+le_surgery = LabelEncoder()
+final_df['SURGERY TYPE Encoded'] = le_surgery.fit_transform(final_df['SURGERY TYPE'])
+final_df['QUALIFICATIONS Encoded'] = final_df['QUALIFICATIONS'].astype('category').cat.codes
+features = final_df[['SURGERY TYPE Encoded', 'QUALIFICATIONS Encoded']]
+scaler = StandardScaler()
+features_scaled = scaler.fit_transform(features)
+knn = NearestNeighbors(n_neighbors=10, algorithm='auto')
+knn.fit(features_scaled)
+def model2(surgery_name):
+    idx = final_df[final_df['SURGERY TYPE'] == surgery_name].index[0]
+    surgery_features = features_scaled[idx].reshape(1, -1)
+    distances, indices = knn.kneighbors(surgery_features)
+    similar_indices = indices[0][1:]
+    return list(dict.fromkeys(final_df['Name'].iloc[similar_indices]))[:5]
 referene_df = pd.DataFrame(columns=symp)
 listings = []
 for i in range(len(symp)):
@@ -117,4 +115,4 @@ for i in input_predicted :
     Surgery = dictionary.get(i)
     print(dictionary.get(i))
 print(model1(Surgery))
-# print(model2(intervention.iloc[0]))
+print(model2(Surgery))
